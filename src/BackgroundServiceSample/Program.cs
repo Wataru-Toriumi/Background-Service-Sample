@@ -1,6 +1,8 @@
 using Avalonia;
 using BackgroundServiceSample.Workers;
-using BackgroundServiceSample.ViewModels;
+using BackgroundServiceSample.Features.Settings;
+using BackgroundServiceSample.Features.Status;
+using BackgroundServiceSample.Shell;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -19,6 +21,7 @@ internal static class Program
         builder.Services.AddSingleton(settingsStore.Current);
         builder.Services.AddSingleton<SettingsViewModel>();
         builder.Services.AddSingleton<WorkerCoordinator>();
+        builder.Services.AddSingleton<StatusViewModel>();
         builder.Services.AddSingleton<MainWindowViewModel>();
         builder.Services.AddHostedService<PeriodicTaskService>();
 

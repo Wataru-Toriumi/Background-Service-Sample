@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="using:BackgroundServiceSample.Shell"
+        xmlns:status="using:BackgroundServiceSample.Features.Status"
+        xmlns:settings="using:BackgroundServiceSample.Features.Settings"
+        x:Class="BackgroundServiceSample.Shell.MainWindow"
+        x:DataType="shell:MainWindowViewModel"
+        Width="640" Height="540" MinWidth="520" MinHeight="440"
+        Title="Background Service Sample">
+  <TabControl Margin="16">
+    <TabItem Header="ステータス" AutomationProperties.AutomationId="StatusTab">
+      <status:StatusView DataContext="{Binding Status}" />
+    </TabItem>
+    <TabItem Header="設定" AutomationProperties.AutomationId="SettingsTab">
+      <settings:SettingsView DataContext="{Binding Settings}" />
+    </TabItem>
+  </TabControl>
+</Window>

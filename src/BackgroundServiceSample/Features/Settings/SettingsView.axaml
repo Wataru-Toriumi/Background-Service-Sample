@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:BackgroundServiceSample.Features.Settings"
+             x:Class="BackgroundServiceSample.Features.Settings.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="0,20,0,0" Spacing="16">
+      <TextBlock Text="定期実行の設定" FontSize="20" FontWeight="SemiBold" />
+      <TextBlock Text="バックグラウンドタスクの実行間隔を変更します。" TextWrapping="Wrap" />
+      <StackPanel Spacing="8">
+        <TextBlock Text="実行間隔（秒）" FontWeight="SemiBold" />
+        <TextBox AutomationProperties.AutomationId="IntervalInput"
+                 AutomationProperties.Name="実行間隔（秒）"
+                 Text="{Binding IntervalSeconds, Mode=TwoWay}"
+                 Width="180" HorizontalAlignment="Left" />
+        <TextBlock Text="1〜3600 秒の整数を指定してください。既定値は 3 秒です。"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+      <Border Padding="12" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}"
+              CornerRadius="4">
+        <StackPanel Spacing="6">
+          <TextBlock Text="{Binding RunningIntervalText}" AutomationProperties.AutomationId="RunningInterval" />
+          <TextBlock Text="保存した設定は、アプリの再起動後に反映されます。"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="保存" Command="{Binding SaveCommand}" Width="100"
+                AutomationProperties.AutomationId="SaveSettingsButton" />
+        <Button Content="元に戻す" Command="{Binding ResetCommand}"
+                AutomationProperties.AutomationId="ResetSettingsButton" />
+      </StackPanel>
+      <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                 AutomationProperties.AutomationId="SettingsMessage" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

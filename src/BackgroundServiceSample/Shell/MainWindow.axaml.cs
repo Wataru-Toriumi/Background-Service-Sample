@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace BackgroundServiceSample.Views;
+namespace BackgroundServiceSample.Shell;
 
 public partial class MainWindow : Window
 {

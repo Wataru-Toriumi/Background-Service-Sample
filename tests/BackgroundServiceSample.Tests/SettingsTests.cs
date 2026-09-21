@@ -1,4 +1,4 @@
-using BackgroundServiceSample.ViewModels;
+using BackgroundServiceSample.Features.Settings;
 using BackgroundServiceSample.Workers;
 using Xunit;
 

@@ -4,9 +4,9 @@ using BackgroundServiceSample.Workers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace BackgroundServiceSample.ViewModels;
+namespace BackgroundServiceSample.Features.Status;
 
-public sealed partial class MainWindowViewModel : ObservableObject
+public sealed partial class StatusViewModel : ObservableObject
 {
     private const int MaxLogCount = 200;
 
@@ -15,10 +15,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private double _progress;
     private string _statusText = "停止中";
 
-    public MainWindowViewModel(WorkerCoordinator coordinator, SettingsViewModel settings)
+    public StatusViewModel(WorkerCoordinator coordinator, WorkerSettings runningSettings)
     {
         _coordinator = coordinator;
-        Settings = settings;
+        RunningIntervalText = $"現在の実行間隔: {runningSettings.IntervalSeconds} 秒";
 
         _coordinator.ActiveChanged += OnActiveChanged;
         _coordinator.LogProduced += OnLogProduced;
@@ -27,7 +27,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     public ObservableCollection<string> Logs { get; } = new();
 
-    public SettingsViewModel Settings { get; }
+    public string RunningIntervalText { get; }
 
     private bool CanStart() => !IsActive;
     private bool CanStop() => IsActive;

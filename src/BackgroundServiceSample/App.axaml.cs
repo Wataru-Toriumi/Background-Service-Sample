@@ -1,8 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using BackgroundServiceSample.ViewModels;
-using BackgroundServiceSample.Views;
+using BackgroundServiceSample.Shell;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BackgroundServiceSample;

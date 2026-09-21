@@ -3,7 +3,7 @@ using BackgroundServiceSample.Workers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace BackgroundServiceSample.ViewModels;
+namespace BackgroundServiceSample.Features.Settings;
 
 public sealed partial class SettingsViewModel : ObservableObject
 {

@@ -54,8 +54,25 @@ Workers プロジェクトは MVVM ライブラリに依存しません。
 | `src/BackgroundServiceSample/Program.cs` | Generic Host を起動し、DI コンテナを Avalonia に橋渡しするエントリポイント |
 | `src/BackgroundServiceSample.Workers/PeriodicTaskService.cs` | `PeriodicTimer` で定期起動する `BackgroundService`。アクティブ時のみ擬似タスクを実行 |
 | `src/BackgroundServiceSample.Workers/WorkerCoordinator.cs` | UI とサービス間で開始/停止の制御・進捗・ログを仲介する singleton |
-| `src/BackgroundServiceSample/ViewModels/MainWindowViewModel.cs` | サービスのイベントを UI スレッドへマーシャリングし、状態・進捗・ログに反映 |
-| `src/BackgroundServiceSample/Views/MainWindow.axaml` | 開始/停止ボタン、進捗バー、ログ一覧を持つメイン画面 |
+| `src/BackgroundServiceSample/Features/Status/StatusViewModel.cs` | サービスのイベントを UI スレッドへマーシャリングし、状態・進捗・ログに反映 |
+| `src/BackgroundServiceSample/Features/Status/StatusView.axaml` | 開始/停止ボタン、進捗バー、ログ一覧を持つステータス画面 |
+| `src/BackgroundServiceSample/Features/Settings/SettingsViewModel.cs` | 実行間隔の編集・検証・保存 |
+| `src/BackgroundServiceSample/Features/Settings/SettingsView.axaml` | 設定画面 |
+| `src/BackgroundServiceSample/Shell/MainWindow.axaml` | 各機能の画面をタブに配置するメインウィンドウ |
+
+アプリの UI は機能ごとに View と ViewModel をまとめています。
+
+```text
+src/BackgroundServiceSample/
+  Features/
+    Status/       # StatusView.axaml / StatusView.axaml.cs / StatusViewModel.cs
+    Settings/     # SettingsView.axaml / SettingsView.axaml.cs / SettingsViewModel.cs
+  Shell/          # MainWindow と、各機能をまとめる MainWindowViewModel
+  App.axaml
+  Program.cs
+```
+
+Status と Settings は互いの ViewModel を参照せず、必要な Workers のサービス・設定を DI で受け取ります。
 
 アプリと Workers をまとめてビルドするには、次を実行します。
 
@@ -131,12 +148,12 @@ SDK バージョンを変更する場合は `global.json` と `mise.toml` を合
 ## 仕組み
 
 ```
-[UI] MainWindowViewModel ──Start/Stop──▶ WorkerCoordinator ◀──参照── PeriodicTaskService [BackgroundService]
+[UI] StatusViewModel ──Start/Stop──▶ WorkerCoordinator ◀──参照── PeriodicTaskService [BackgroundService]
             ▲                                  │
             └────── 進捗 / ログ / 状態通知 ──────┘
 ```
 
-`PeriodicTaskService` と `MainWindowViewModel` は互いを直接参照せず、
+`PeriodicTaskService` と `StatusViewModel` は互いを直接参照せず、
 singleton の `WorkerCoordinator` をハブにして疎結合に連携します。
 サービス側のスレッドから発生したイベントは `Dispatcher.UIThread` 経由で
 UI スレッドにマーシャリングしてから反映します。
