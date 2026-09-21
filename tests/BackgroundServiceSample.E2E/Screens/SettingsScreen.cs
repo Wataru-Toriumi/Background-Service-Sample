@@ -1,11 +1,14 @@
 using FlaUI.Core.AutomationElements;
 
-namespace BackgroundServiceSample.E2E;
+namespace BackgroundServiceSample.E2E.Screens;
 
 internal sealed class SettingsScreen(Window window)
 {
     private AutomationElement Element(string id) => window.FindFirstDescendant(cf => cf.ByAutomationId(id))
         ?? throw new InvalidOperationException($"Settings element not found: {id}");
+
+    public void Open() => Element("SettingsTab").Click();
+    public bool IsVisible => !Element("IntervalInput").IsOffscreen;
 
     public string Interval
     {

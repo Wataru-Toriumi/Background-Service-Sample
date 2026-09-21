@@ -1,10 +1,11 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using BackgroundServiceSample.E2E.Screens;
 using FlaUI.Core.AutomationElements;
 using FlaUI.UIA3;
 using Xunit;
 
-namespace BackgroundServiceSample.E2E;
+namespace BackgroundServiceSample.E2E.Infrastructure;
 
 internal sealed class AppSession : IDisposable
 {
@@ -57,24 +58,20 @@ internal sealed class AppSession : IDisposable
         _window!.Focus();
     }
 
-    private AutomationElement Element(string id) =>
-        _window!.FindFirstDescendant(cf => cf.ByAutomationId(id))
-        ?? throw new InvalidOperationException($"UI element not found: {id}");
-
-    public string Status => Element("StatusText").Name;
-    public bool StartEnabled => Element("StartButton").IsEnabled;
-    public bool StopEnabled => Element("StopButton").IsEnabled;
-    public double Progress => Element("ProgressBar").Patterns.RangeValue.Pattern.Value.Value;
-    public string[] Logs => _window!.FindAllDescendants(cf => cf.ByAutomationId("LogEntry"))
-        .Select(element => element.Name).ToArray();
-
-    public void Click(string id) => Element(id).AsButton().Click();
+    public StatusScreen OpenStatus()
+    {
+        var screen = new StatusScreen(_window!);
+        screen.Open();
+        WaitUntil(() => screen.IsVisible, "Status screen");
+        return screen;
+    }
 
     public SettingsScreen OpenSettings()
     {
-        Element("SettingsTab").Click();
-        WaitUntil(() => Element("IntervalInput").IsOffscreen == false, "Settings screen");
-        return new SettingsScreen(_window!);
+        var screen = new SettingsScreen(_window!);
+        screen.Open();
+        WaitUntil(() => screen.IsVisible, "Settings screen");
+        return screen;
     }
 
     public void AssertAlive() => Assert.False(_process!.HasExited, "Application exited unexpectedly.");

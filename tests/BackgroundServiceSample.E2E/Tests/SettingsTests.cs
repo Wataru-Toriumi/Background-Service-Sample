@@ -1,6 +1,7 @@
+using BackgroundServiceSample.E2E.Infrastructure;
 using Xunit;
 
-namespace BackgroundServiceSample.E2E;
+namespace BackgroundServiceSample.E2E.Tests;
 
 public sealed class SettingsTests
 {

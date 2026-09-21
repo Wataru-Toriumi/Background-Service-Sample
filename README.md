@@ -62,6 +62,18 @@ mise exec -- dotnet build src/BackgroundServiceSample
 `tests/BackgroundServiceSample.E2E` は xUnit と FlaUI.UIA3 を使い、公開した実際のアプリを
 別プロセスとして起動します。バックグラウンドサービスも実物を動かします。
 
+E2E は画面操作・実行基盤・シナリオをディレクトリで分けています。
+
+```text
+tests/BackgroundServiceSample.E2E/
+  Screens/          # SettingsScreen / StatusScreen: 要素検索、入力・クリック、表示値の取得
+  Infrastructure/   # AppSession: 起動・終了、待機、診断情報の保存
+  Tests/            # SettingsTests / WorkerLifecycleTests: 操作手順と期待値の検証
+```
+
+テストは `app.OpenSettings()` / `app.OpenStatus()` で Screen Object を取得します。
+AutomationId と FlaUI の要素操作は各 Screen に閉じ込め、UI 要素は操作・取得時に検索します。
+
 Windows に .NET SDK 10.0.300 と .NET 10 Desktop Runtime をインストールし、
 ログイン済み・ロックされていないデスクトップの PowerShell で実行してください。
 Appium サーバーは不要です。テスト中はマウスを操作するため、他の操作を控えてください。
