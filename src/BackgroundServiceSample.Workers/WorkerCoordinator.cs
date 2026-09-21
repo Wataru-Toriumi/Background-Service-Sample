@@ -1,4 +1,4 @@
-namespace BackgroundServiceSample.Services;
+namespace BackgroundServiceSample.Workers;
 
 /// <summary>
 /// UI とバックグラウンドサービスの間で実行状態の制御と進捗・ログの通知を仲介する。

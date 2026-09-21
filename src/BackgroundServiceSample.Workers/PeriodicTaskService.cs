@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Hosting;
 
-namespace BackgroundServiceSample.Services;
+namespace BackgroundServiceSample.Workers;
 
 /// <summary>
 /// 一定間隔で起動し、アクティブ状態のときだけ擬似タスクを実行する定期実行サービス。

@@ -20,7 +20,7 @@ mise install
 ## 実行
 
 ```bash
-mise exec -- dotnet run --project src
+mise exec -- dotnet run --project src/BackgroundServiceSample
 ```
 
 ウィンドウが開いたら **開始** を押すと、3 秒間隔でタスクが実行され、
@@ -28,13 +28,22 @@ mise exec -- dotnet run --project src
 
 ## 構成
 
+Avalonia アプリと UI に依存しない Workers ライブラリを別プロジェクトに分けています。
+アプリが Workers を参照し、Generic Host の起動・終了と DI 登録はアプリ側で管理します。
+
 | ファイル | 役割 |
 | --- | --- |
-| `src/Program.cs` | Generic Host を起動し、DI コンテナを Avalonia に橋渡しするエントリポイント |
-| `src/Services/PeriodicTaskService.cs` | `PeriodicTimer` で定期起動する `BackgroundService`。アクティブ時のみ擬似タスクを実行 |
-| `src/Services/WorkerCoordinator.cs` | UI とサービス間で開始/停止の制御・進捗・ログを仲介する singleton |
-| `src/ViewModels/MainWindowViewModel.cs` | サービスのイベントを UI スレッドへマーシャリングし、状態・進捗・ログに反映 |
-| `src/Views/MainWindow.axaml` | 開始/停止ボタン、進捗バー、ログ一覧を持つメイン画面 |
+| `src/BackgroundServiceSample/Program.cs` | Generic Host を起動し、DI コンテナを Avalonia に橋渡しするエントリポイント |
+| `src/BackgroundServiceSample.Workers/PeriodicTaskService.cs` | `PeriodicTimer` で定期起動する `BackgroundService`。アクティブ時のみ擬似タスクを実行 |
+| `src/BackgroundServiceSample.Workers/WorkerCoordinator.cs` | UI とサービス間で開始/停止の制御・進捗・ログを仲介する singleton |
+| `src/BackgroundServiceSample/ViewModels/MainWindowViewModel.cs` | サービスのイベントを UI スレッドへマーシャリングし、状態・進捗・ログに反映 |
+| `src/BackgroundServiceSample/Views/MainWindow.axaml` | 開始/停止ボタン、進捗バー、ログ一覧を持つメイン画面 |
+
+アプリと Workers をまとめてビルドするには、次を実行します。
+
+```bash
+mise exec -- dotnet build src/BackgroundServiceSample
+```
 
 ## 仕組み
 

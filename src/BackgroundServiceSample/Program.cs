@@ -1,5 +1,5 @@
 using Avalonia;
-using BackgroundServiceSample.Services;
+using BackgroundServiceSample.Workers;
 using BackgroundServiceSample.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

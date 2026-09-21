@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using BackgroundServiceSample.Common;
-using BackgroundServiceSample.Services;
+using BackgroundServiceSample.Workers;
 
 namespace BackgroundServiceSample.ViewModels;
 
