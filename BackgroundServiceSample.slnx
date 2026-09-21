@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BackgroundServiceSample/BackgroundServiceSample.csproj" />
+    <Project Path="src/BackgroundServiceSample.Workers/BackgroundServiceSample.Workers.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BackgroundServiceSample.Tests/BackgroundServiceSample.Tests.csproj" />
+    <Project Path="tests/BackgroundServiceSample.E2E/BackgroundServiceSample.E2E.csproj" />
+  </Folder>
+</Solution>

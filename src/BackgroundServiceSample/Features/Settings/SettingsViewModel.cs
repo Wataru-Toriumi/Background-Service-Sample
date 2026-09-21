@@ -27,7 +27,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         get => _intervalSeconds;
         set
         {
-            if (SetProperty(ref _intervalSeconds, value)) Message = "未保存の変更があります。";
+            if (SetProperty(ref _intervalSeconds, value))
+            {
+                Message = "未保存の変更があります。";
+            }
         }
     }
 

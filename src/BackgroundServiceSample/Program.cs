@@ -1,8 +1,8 @@
 using Avalonia;
-using BackgroundServiceSample.Workers;
 using BackgroundServiceSample.Features.Settings;
 using BackgroundServiceSample.Features.Status;
 using BackgroundServiceSample.Shell;
+using BackgroundServiceSample.Workers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

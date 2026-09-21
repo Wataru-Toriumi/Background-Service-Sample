@@ -25,9 +25,12 @@ public sealed partial class StatusViewModel : ObservableObject
         _coordinator.ProgressChanged += OnProgressChanged;
     }
 
-    public ObservableCollection<string> Logs { get; } = new();
+    public ObservableCollection<string> Logs { get; } = [];
 
-    public string RunningIntervalText { get; }
+    public string RunningIntervalText
+    {
+        get;
+    }
 
     private bool CanStart() => !IsActive;
     private bool CanStop() => IsActive;

@@ -139,7 +139,41 @@ E2E とは独立した Ubuntu ジョブで動き、違反がある場合は失�
 C#・PowerShell は 4 スペース、XAML・プロジェクトファイル・JSON・YAML・TOML・Markdown は 2 スペースです。
 Markdown の意図的な改行用末尾スペースは許容します。生成物はチェック対象外です。
 `.gitattributes` で Windows のチェックアウト時も LF に揃えます。
-このチェックは C# の命名規則やコード解析、PowerShell の構文チェックは行いません。
+共通の書式チェックに加え、同じワークフローの **C# IDE diagnostics** ジョブで
+全プロジェクトの C# コードスタイルも検証します。PowerShell の構文チェックは対象外です。
+
+### C# の IDE 診断
+
+`.editorconfig` に明示したルールをエラーとして扱います。
+`Directory.Build.props` でビルド時にも有効にし、CI では formatter の検証とビルドの両方を実行します。
+SDK の更新で新しい提案が加わっても、すべての提案を一律にエラーにはしません。
+
+| 診断 | 内容 |
+| --- | --- |
+| IDE0001〜IDE0005 | 冗長な名前・メンバー参照・キャスト・using の削除 |
+| IDE0007 | ローカル変数に `var` を使用 |
+| IDE0011 | 条件分岐・ループに波括弧を付ける |
+| IDE0017・IDE0028・IDE0090 | オブジェクト・コレクション初期化と `new` の簡略化 |
+| IDE0029〜IDE0031・IDE0041 | null 処理の簡略化 |
+| IDE0040・IDE0044 | アクセス修飾子の明示・変更しないフィールドの readonly 化 |
+| IDE0055・IDE0059 | C# の書式・不要な代入 |
+| IDE0063・IDE0065・IDE0161 | using 宣言・using の配置・ファイルスコープ名前空間 |
+
+ローカルでの検証:
+
+```bash
+mise exec -- dotnet restore BackgroundServiceSample.slnx
+mise exec -- dotnet format whitespace BackgroundServiceSample.slnx --no-restore --verify-no-changes
+mise exec -- dotnet format style BackgroundServiceSample.slnx --no-restore --verify-no-changes --severity warn
+mise exec -- dotnet build BackgroundServiceSample.slnx --no-restore
+```
+
+自動修正する場合は、上記 `dotnet format` の `--verify-no-changes` を外して実行してください。
+変更後は差分とテスト結果を確認します。修正できない診断は手動で修正してください。
+IDE0005 のビルド検証のため XML ドキュメント生成を有効にしていますが、
+XML コメントの記述を必須にはしていません。
+
+### 共通書式のローカルチェック
 
 ローカルでは [editorconfig-checker v4.0.2](https://github.com/editorconfig-checker/editorconfig-checker/releases/tag/v4.0.2)
 をインストールし、リポジトリ直下で次を実行します。CI とローカルで同じバージョン・設定を使います。

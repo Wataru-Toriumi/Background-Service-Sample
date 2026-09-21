@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- IDE0005 requires documentation generation during build. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- XML comments are optional; this only enables unused-using analysis. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+</Project>

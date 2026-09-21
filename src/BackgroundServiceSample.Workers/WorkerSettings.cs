@@ -10,6 +10,8 @@ public sealed record WorkerSettings
     public void Validate()
     {
         if (IntervalSeconds is < 1 or > MaxIntervalSeconds)
+        {
             throw new ArgumentOutOfRangeException(nameof(IntervalSeconds), "実行間隔は 1〜3600 秒で指定してください。");
+        }
     }
 }

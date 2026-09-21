@@ -25,11 +25,15 @@ internal sealed class AppSession : IDisposable
     public void Start()
     {
         if (!OperatingSystem.IsWindows())
+        {
             throw new PlatformNotSupportedException("FlaUI E2E requires an interactive Windows desktop.");
+        }
 
         var executable = Environment.GetEnvironmentVariable("E2E_APP_PATH");
         if (string.IsNullOrWhiteSpace(executable) || !File.Exists(executable))
+        {
             throw new InvalidOperationException("Set E2E_APP_PATH to the published app exe, or run scripts/test-e2e.ps1.");
+        }
 
         _process = new Process
         {
@@ -41,8 +45,8 @@ internal sealed class AppSession : IDisposable
                 RedirectStandardError = true,
             },
         };
-        _process.OutputDataReceived += (_, args) => { if (args.Data is not null) _output.Enqueue(args.Data); };
-        _process.ErrorDataReceived += (_, args) => { if (args.Data is not null) _output.Enqueue(args.Data); };
+        _process.OutputDataReceived += (_, args) => { if (args.Data is not null) { _output.Enqueue(args.Data); } };
+        _process.ErrorDataReceived += (_, args) => { if (args.Data is not null) { _output.Enqueue(args.Data); } };
         _process.StartInfo.Environment["BACKGROUND_SERVICE_SAMPLE_SETTINGS_DIR"] = _settingsDirectory;
         _process.Start();
         _process.BeginOutputReadLine();
@@ -51,7 +55,11 @@ internal sealed class AppSession : IDisposable
         WaitUntil(() =>
         {
             _process.Refresh();
-            if (_process.MainWindowHandle == IntPtr.Zero) return false;
+            if (_process.MainWindowHandle == IntPtr.Zero)
+            {
+                return false;
+            }
+
             _window = _automation.FromHandle(_process.MainWindowHandle).AsWindow();
             return !_window.IsOffscreen && _window.Title == "Background Service Sample";
         }, "Visible main window");
@@ -85,7 +93,10 @@ internal sealed class AppSession : IDisposable
             AssertAlive();
             try
             {
-                if (condition()) return;
+                if (condition())
+                {
+                    return;
+                }
             }
             catch (Exception error)
             {
@@ -139,7 +150,10 @@ internal sealed class AppSession : IDisposable
 
     private static void TryCapture(Action action, string directory)
     {
-        try { action(); }
+        try
+        {
+            action();
+        }
         catch (Exception error) { File.AppendAllText(Path.Combine(directory, "capture-errors.txt"), error + Environment.NewLine); }
     }
 
@@ -169,7 +183,9 @@ internal sealed class AppSession : IDisposable
             _process?.Dispose();
             _automation?.Dispose();
             if (_ownsSettingsDirectory && Directory.Exists(_settingsDirectory))
+            {
                 Directory.Delete(_settingsDirectory, recursive: true);
+            }
         }
     }
 }

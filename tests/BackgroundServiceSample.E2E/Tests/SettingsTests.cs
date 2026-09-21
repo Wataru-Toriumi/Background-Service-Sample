@@ -41,14 +41,21 @@ public sealed class SettingsTests
         }
         finally
         {
-            if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
         }
     }
 
     private static void WithApp(string directory, Action<AppSession> scenario)
     {
         using var app = new AppSession(directory);
-        try { app.Start(); scenario(app); }
+        try
+        {
+            app.Start();
+            scenario(app);
+        }
         catch (Exception error) { app.SaveFailure(error); throw; }
     }
 }

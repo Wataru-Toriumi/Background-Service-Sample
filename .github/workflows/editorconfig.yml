@@ -31,3 +31,33 @@ jobs:
 
       - name: Check EditorConfig rules
         run: editorconfig-checker
+
+  code-style:
+    name: C# IDE diagnostics
+    runs-on: windows-2022
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Restore all projects
+        run: dotnet restore BackgroundServiceSample.slnx
+
+      - name: Verify C# whitespace
+        run: dotnet format whitespace BackgroundServiceSample.slnx --no-restore --verify-no-changes
+
+      - name: Verify IDE code style
+        run: dotnet format style BackgroundServiceSample.slnx --no-restore --verify-no-changes --severity warn
+
+      - name: Build with IDE diagnostics
+        run: dotnet build BackgroundServiceSample.slnx -c Release --no-restore

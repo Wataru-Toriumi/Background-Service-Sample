@@ -8,7 +8,10 @@ public sealed class WorkerSettingsStore
     private readonly string _filePath;
 
     public WorkerSettings Current { get; private set; } = new();
-    public string? LoadError { get; }
+    public string? LoadError
+    {
+        get;
+    }
 
     public WorkerSettingsStore(string directory)
     {
@@ -41,7 +44,10 @@ public sealed class WorkerSettingsStore
         }
         finally
         {
-            if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+            if (File.Exists(temporaryPath))
+            {
+                File.Delete(temporaryPath);
+            }
         }
     }
 }
