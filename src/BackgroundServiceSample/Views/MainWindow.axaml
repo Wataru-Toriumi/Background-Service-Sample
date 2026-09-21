@@ -4,32 +4,71 @@
         xmlns:sys="using:System"
         x:Class="BackgroundServiceSample.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="560" Height="480"
+        Width="640" Height="540" MinWidth="520" MinHeight="440"
         Title="Background Service Sample">
-  <DockPanel Margin="16">
-    <StackPanel DockPanel.Dock="Top" Spacing="12">
-      <TextBlock AutomationProperties.AutomationId="StatusText" Text="{Binding StatusText, StringFormat='状態: {0}'}"
-                 FontSize="16" FontWeight="SemiBold" />
-      <StackPanel Orientation="Horizontal" Spacing="8">
-        <Button AutomationProperties.AutomationId="StartButton" Content="開始" Command="{Binding StartCommand}" Width="100" />
-        <Button AutomationProperties.AutomationId="StopButton" Content="停止" Command="{Binding StopCommand}" Width="100" />
-      </StackPanel>
-      <ProgressBar AutomationProperties.AutomationId="ProgressBar" Minimum="0" Maximum="100" Value="{Binding Progress}"
-                   Height="20" ShowProgressText="True" />
-      <TextBlock Text="実行ログ" FontWeight="SemiBold" Margin="0,4,0,0" />
-    </StackPanel>
+  <TabControl Margin="16">
+    <TabItem Header="ステータス" AutomationProperties.AutomationId="StatusTab">
+      <DockPanel Margin="0,16,0,0">
+        <StackPanel DockPanel.Dock="Top" Spacing="12">
+          <TextBlock AutomationProperties.AutomationId="StatusText" Text="{Binding StatusText, StringFormat='状態: {0}'}"
+                     FontSize="16" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Settings.RunningIntervalText}" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button AutomationProperties.AutomationId="StartButton" Content="開始" Command="{Binding StartCommand}" Width="100" />
+            <Button AutomationProperties.AutomationId="StopButton" Content="停止" Command="{Binding StopCommand}" Width="100" />
+          </StackPanel>
+          <ProgressBar AutomationProperties.AutomationId="ProgressBar" Minimum="0" Maximum="100" Value="{Binding Progress}"
+                       Height="20" ShowProgressText="True" />
+          <TextBlock Text="実行ログ" FontWeight="SemiBold" Margin="0,4,0,0" />
+        </StackPanel>
 
-    <Border BorderBrush="#33000000" BorderThickness="1" CornerRadius="4" Margin="0,8,0,0">
+        <Border BorderBrush="#33000000" BorderThickness="1" CornerRadius="4" Margin="0,8,0,0">
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Logs}" Margin="8">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="sys:String">
+                  <TextBlock AutomationProperties.AutomationId="LogEntry" Text="{Binding}" FontFamily="Cascadia Code,Consolas,Menlo,monospace"
+                             FontSize="12" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Border>
+      </DockPanel>
+    </TabItem>
+    <TabItem Header="設定" AutomationProperties.AutomationId="SettingsTab">
       <ScrollViewer>
-        <ItemsControl ItemsSource="{Binding Logs}" Margin="8">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="sys:String">
-              <TextBlock AutomationProperties.AutomationId="LogEntry" Text="{Binding}" FontFamily="Cascadia Code,Consolas,Menlo,monospace"
-                         FontSize="12" />
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <StackPanel Margin="0,20,0,0" Spacing="16" DataContext="{Binding Settings}"
+                    x:DataType="vm:SettingsViewModel">
+          <TextBlock Text="定期実行の設定" FontSize="20" FontWeight="SemiBold" />
+          <TextBlock Text="バックグラウンドタスクの実行間隔を変更します。" TextWrapping="Wrap" />
+          <StackPanel Spacing="8">
+            <TextBlock Text="実行間隔（秒）" FontWeight="SemiBold" />
+            <TextBox AutomationProperties.AutomationId="IntervalInput"
+                     AutomationProperties.Name="実行間隔（秒）"
+                     Text="{Binding IntervalSeconds, Mode=TwoWay}"
+                     Width="180" HorizontalAlignment="Left" />
+            <TextBlock Text="1〜3600 秒の整数を指定してください。既定値は 3 秒です。"
+                       TextWrapping="Wrap" />
+          </StackPanel>
+          <Border Padding="12" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}"
+                  CornerRadius="4">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{Binding RunningIntervalText}" AutomationProperties.AutomationId="RunningInterval" />
+              <TextBlock Text="保存した設定は、アプリの再起動後に反映されます。"
+                         TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="保存" Command="{Binding SaveCommand}" Width="100"
+                    AutomationProperties.AutomationId="SaveSettingsButton" />
+            <Button Content="元に戻す" Command="{Binding ResetCommand}"
+                    AutomationProperties.AutomationId="ResetSettingsButton" />
+          </StackPanel>
+          <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                     AutomationProperties.AutomationId="SettingsMessage" />
+        </StackPanel>
       </ScrollViewer>
-    </Border>
-  </DockPanel>
+    </TabItem>
+  </TabControl>
 </Window>

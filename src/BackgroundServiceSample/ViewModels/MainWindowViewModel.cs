@@ -14,9 +14,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     private double _progress;
     private string _statusText = "停止中";
 
-    public MainWindowViewModel(WorkerCoordinator coordinator)
+    public MainWindowViewModel(WorkerCoordinator coordinator, SettingsViewModel settings)
     {
         _coordinator = coordinator;
+        Settings = settings;
 
         StartCommand = new RelayCommand(_coordinator.Start, () => !IsActive);
         StopCommand = new RelayCommand(_coordinator.Stop, () => IsActive);
@@ -27,6 +28,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public ObservableCollection<string> Logs { get; } = new();
+
+    public SettingsViewModel Settings { get; }
 
     public RelayCommand StartCommand { get; }
 

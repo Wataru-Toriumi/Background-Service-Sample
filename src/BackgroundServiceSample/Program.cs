@@ -12,6 +12,12 @@ internal static class Program
     public static void Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
+        var settingsDirectory = Environment.GetEnvironmentVariable("BACKGROUND_SERVICE_SAMPLE_SETTINGS_DIR")
+            ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BackgroundServiceSample");
+        var settingsStore = new WorkerSettingsStore(settingsDirectory);
+        builder.Services.AddSingleton(settingsStore);
+        builder.Services.AddSingleton(settingsStore.Current);
+        builder.Services.AddSingleton<SettingsViewModel>();
         builder.Services.AddSingleton<WorkerCoordinator>();
         builder.Services.AddSingleton<MainWindowViewModel>();
         builder.Services.AddHostedService<PeriodicTaskService>();

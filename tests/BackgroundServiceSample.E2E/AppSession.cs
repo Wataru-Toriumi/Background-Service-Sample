@@ -12,6 +12,14 @@ internal sealed class AppSession : IDisposable
     private Process? _process;
     private UIA3Automation? _automation;
     private Window? _window;
+    private readonly string _settingsDirectory;
+    private readonly bool _ownsSettingsDirectory;
+
+    public AppSession(string? settingsDirectory = null)
+    {
+        _ownsSettingsDirectory = settingsDirectory is null;
+        _settingsDirectory = settingsDirectory ?? Path.Combine(Path.GetTempPath(), "BackgroundServiceSample.E2E", Guid.NewGuid().ToString("N"));
+    }
 
     public void Start()
     {
@@ -34,6 +42,7 @@ internal sealed class AppSession : IDisposable
         };
         _process.OutputDataReceived += (_, args) => { if (args.Data is not null) _output.Enqueue(args.Data); };
         _process.ErrorDataReceived += (_, args) => { if (args.Data is not null) _output.Enqueue(args.Data); };
+        _process.StartInfo.Environment["BACKGROUND_SERVICE_SAMPLE_SETTINGS_DIR"] = _settingsDirectory;
         _process.Start();
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
@@ -60,6 +69,13 @@ internal sealed class AppSession : IDisposable
         .Select(element => element.Name).ToArray();
 
     public void Click(string id) => Element(id).AsButton().Click();
+
+    public SettingsScreen OpenSettings()
+    {
+        Element("SettingsTab").Click();
+        WaitUntil(() => Element("IntervalInput").IsOffscreen == false, "Settings screen");
+        return new SettingsScreen(_window!);
+    }
 
     public void AssertAlive() => Assert.False(_process!.HasExited, "Application exited unexpectedly.");
 
@@ -89,6 +105,14 @@ internal sealed class AppSession : IDisposable
         _window!.Close();
         Assert.True(_process!.WaitForExit(10_000), "Closing the window must terminate the host and process.");
         Assert.Equal(0, _process.ExitCode);
+    }
+
+    public void CaptureScreenshot(string name)
+    {
+        var directory = Environment.GetEnvironmentVariable("E2E_ARTIFACTS_DIR")
+            ?? Path.Combine(AppContext.BaseDirectory, "TestResults");
+        Directory.CreateDirectory(directory);
+        _window!.CaptureToFile(Path.Combine(directory, name + ".png"));
     }
 
     public void SaveFailure(Exception error)
@@ -147,6 +171,8 @@ internal sealed class AppSession : IDisposable
         {
             _process?.Dispose();
             _automation?.Dispose();
+            if (_ownsSettingsDirectory && Directory.Exists(_settingsDirectory))
+                Directory.Delete(_settingsDirectory, recursive: true);
         }
     }
 }

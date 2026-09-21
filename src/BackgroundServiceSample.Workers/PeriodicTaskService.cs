@@ -7,22 +7,24 @@ namespace BackgroundServiceSample.Workers;
 /// </summary>
 public sealed class PeriodicTaskService : BackgroundService
 {
-    private static readonly TimeSpan Interval = TimeSpan.FromSeconds(3);
+    private readonly TimeSpan _interval;
     private const int StepCount = 20;
 
     private readonly WorkerCoordinator _coordinator;
     private int _runCount;
 
-    public PeriodicTaskService(WorkerCoordinator coordinator)
+    public PeriodicTaskService(WorkerCoordinator coordinator, WorkerSettings settings)
     {
         _coordinator = coordinator;
+        settings.Validate();
+        _interval = TimeSpan.FromSeconds(settings.IntervalSeconds);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _coordinator.ReportLog("バックグラウンドサービスを起動しました (待機中)");
 
-        using var timer = new PeriodicTimer(Interval);
+        using var timer = new PeriodicTimer(_interval);
 
         try
         {

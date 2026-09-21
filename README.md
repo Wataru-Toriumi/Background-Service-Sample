@@ -23,8 +23,20 @@ mise install
 mise exec -- dotnet run --project src/BackgroundServiceSample
 ```
 
-ウィンドウが開いたら **開始** を押すと、3 秒間隔でタスクが実行され、
+ウィンドウの **ステータス** タブで **開始** を押すと、既定では 3 秒間隔でタスクが実行され、
 進捗バーが 0 → 100% に進みます。**停止** で待機状態に戻ります。
+
+**設定** タブでは実行間隔を 1〜3600 秒の整数で指定し、**保存** できます。
+変更はアプリの再起動後に反映されます。**元に戻す** は未保存の編集を破棄して保存済みの値に戻します。
+保存先はユーザーの LocalApplicationData 配下の `BackgroundServiceSample/settings.json`
+（Windows では通常 `%LOCALAPPDATA%\BackgroundServiceSample\settings.json`）です。
+読み込みに失敗した場合は既定値で起動し、設定画面に警告を表示します。
+
+設定の保存・入力チェックなどのテストは GUI なしで実行できます。
+
+```bash
+mise exec -- dotnet test tests/BackgroundServiceSample.Tests
+```
 
 ## 構成
 
@@ -70,6 +82,10 @@ Appium サーバーは不要です。テスト中はマウスを操作するた�
 - 停止後、実行中の処理は完了し、完了ログと進捗 100% が表示される
 - その後 6 秒間（定期間隔の 2 回分）、新しいタスクのログが増えない
 - ウィンドウを閉じると Host を含むアプリのプロセスが正常終了する
+- 設定画面の入力チェック・保存・編集の取り消しと、再起動後の設定読み込み
+
+E2E は毎回専用の一時ディレクトリを `BACKGROUND_SERVICE_SAMPLE_SETTINGS_DIR` で指定し、
+普段の設定を変更しません。設定保存後と再起動後の画面画像も結果に保存します。
 
 要素は `AutomationProperties.AutomationId` で検索し、状態変化は最大 20 秒待機します。
 テストは並列実行しません。結果は `artifacts/e2e/results` に保存します。
@@ -83,6 +99,7 @@ CI に組み込む場合も、GUI 操作できる Windows セッションが必�
 [Windows E2E](https://github.com/Wataru-Toriumi/Background-Service-Sample/actions/workflows/windows-e2e.yml)
 は GitHub-hosted の `windows-2022` runner で実行します。
 ローカルと同じ `scripts/test-e2e.ps1` を使い、アプリの発行から FlaUI テストまで行います。
+設定の保存と入力チェックのテストも実行します。
 
 - `main` への push と Pull Request で自動実行
 - Actions の **Windows E2E → Run workflow** から手動実行
