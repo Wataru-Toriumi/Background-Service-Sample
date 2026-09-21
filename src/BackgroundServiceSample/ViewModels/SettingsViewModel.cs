@@ -1,10 +1,11 @@
 using System.Globalization;
-using BackgroundServiceSample.Common;
 using BackgroundServiceSample.Workers;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace BackgroundServiceSample.ViewModels;
 
-public sealed class SettingsViewModel : ViewModelBase
+public sealed partial class SettingsViewModel : ObservableObject
 {
     private readonly WorkerSettingsStore _store;
     private readonly int _runningIntervalSeconds;
@@ -17,12 +18,8 @@ public sealed class SettingsViewModel : ViewModelBase
         _runningIntervalSeconds = runningSettings.IntervalSeconds;
         _intervalSeconds = store.Current.IntervalSeconds.ToString(CultureInfo.InvariantCulture);
         _message = store.LoadError ?? "";
-        SaveCommand = new RelayCommand(Save);
-        ResetCommand = new RelayCommand(Reset);
     }
 
-    public RelayCommand SaveCommand { get; }
-    public RelayCommand ResetCommand { get; }
     public string RunningIntervalText => $"現在の実行間隔: {_runningIntervalSeconds} 秒";
 
     public string IntervalSeconds
@@ -30,16 +27,17 @@ public sealed class SettingsViewModel : ViewModelBase
         get => _intervalSeconds;
         set
         {
-            if (SetField(ref _intervalSeconds, value)) Message = "未保存の変更があります。";
+            if (SetProperty(ref _intervalSeconds, value)) Message = "未保存の変更があります。";
         }
     }
 
     public string Message
     {
         get => _message;
-        private set => SetField(ref _message, value);
+        private set => SetProperty(ref _message, value);
     }
 
+    [RelayCommand]
     private void Save()
     {
         if (!int.TryParse(IntervalSeconds, out var seconds) || seconds is < 1 or > WorkerSettings.MaxIntervalSeconds)
@@ -61,6 +59,7 @@ public sealed class SettingsViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
     private void Reset()
     {
         IntervalSeconds = _store.Current.IntervalSeconds.ToString(CultureInfo.InvariantCulture);

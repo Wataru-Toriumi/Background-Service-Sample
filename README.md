@@ -43,6 +43,12 @@ mise exec -- dotnet test tests/BackgroundServiceSample.Tests
 Avalonia アプリと UI に依存しない Workers ライブラリを別プロジェクトに分けています。
 アプリが Workers を参照し、Generic Host の起動・終了と DI 登録はアプリ側で管理します。
 
+ViewModel は `CommunityToolkit.Mvvm` の `ObservableObject` を継承し、
+`SetProperty` で変更を通知します。コマンドは `[RelayCommand]` から生成します。
+開始・停止ボタンの有効状態は `CanExecute` と `NotifyCanExecuteChanged` で更新します。
+状態や進捗などは ViewModel 内からだけ変更できるよう、プロパティの private setter を維持しています。
+Workers プロジェクトは MVVM ライブラリに依存しません。
+
 | ファイル | 役割 |
 | --- | --- |
 | `src/BackgroundServiceSample/Program.cs` | Generic Host を起動し、DI コンテナを Avalonia に橋渡しするエントリポイント |

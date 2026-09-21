@@ -1,11 +1,12 @@
 using System.Collections.ObjectModel;
 using Avalonia.Threading;
-using BackgroundServiceSample.Common;
 using BackgroundServiceSample.Workers;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace BackgroundServiceSample.ViewModels;
 
-public sealed class MainWindowViewModel : ViewModelBase
+public sealed partial class MainWindowViewModel : ObservableObject
 {
     private const int MaxLogCount = 200;
 
@@ -19,9 +20,6 @@ public sealed class MainWindowViewModel : ViewModelBase
         _coordinator = coordinator;
         Settings = settings;
 
-        StartCommand = new RelayCommand(_coordinator.Start, () => !IsActive);
-        StopCommand = new RelayCommand(_coordinator.Stop, () => IsActive);
-
         _coordinator.ActiveChanged += OnActiveChanged;
         _coordinator.LogProduced += OnLogProduced;
         _coordinator.ProgressChanged += OnProgressChanged;
@@ -31,20 +29,25 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public SettingsViewModel Settings { get; }
 
-    public RelayCommand StartCommand { get; }
+    private bool CanStart() => !IsActive;
+    private bool CanStop() => IsActive;
 
-    public RelayCommand StopCommand { get; }
+    [RelayCommand(CanExecute = nameof(CanStart))]
+    private void Start() => _coordinator.Start();
+
+    [RelayCommand(CanExecute = nameof(CanStop))]
+    private void Stop() => _coordinator.Stop();
 
     public bool IsActive
     {
         get => _isActive;
         private set
         {
-            if (SetField(ref _isActive, value))
+            if (SetProperty(ref _isActive, value))
             {
                 StatusText = value ? "実行中" : "停止中";
-                StartCommand.RaiseCanExecuteChanged();
-                StopCommand.RaiseCanExecuteChanged();
+                StartCommand.NotifyCanExecuteChanged();
+                StopCommand.NotifyCanExecuteChanged();
             }
         }
     }
@@ -52,13 +55,13 @@ public sealed class MainWindowViewModel : ViewModelBase
     public double Progress
     {
         get => _progress;
-        private set => SetField(ref _progress, value);
+        private set => SetProperty(ref _progress, value);
     }
 
     public string StatusText
     {
         get => _statusText;
-        private set => SetField(ref _statusText, value);
+        private set => SetProperty(ref _statusText, value);
     }
 
     private void OnActiveChanged(object? sender, bool active)
