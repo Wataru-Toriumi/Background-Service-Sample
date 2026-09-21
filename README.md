@@ -131,6 +131,25 @@ CI に組み込む場合も、GUI 操作できる Windows セッションが必�
 
 ## GitHub Actions
 
+[EditorConfig](https://github.com/Wataru-Toriumi/Background-Service-Sample/actions/workflows/editorconfig.yml)
+は `main` への push・Pull Request・手動実行で、`.editorconfig` に沿った書式を検証します。
+E2E とは独立した Ubuntu ジョブで動き、違反がある場合は失敗します。
+
+チェック内容は UTF-8、LF、最終行の改行、末尾空白、スペースによるインデントです。
+C#・PowerShell は 4 スペース、XAML・プロジェクトファイル・JSON・YAML・TOML・Markdown は 2 スペースです。
+Markdown の意図的な改行用末尾スペースは許容します。生成物はチェック対象外です。
+`.gitattributes` で Windows のチェックアウト時も LF に揃えます。
+このチェックは C# の命名規則やコード解析、PowerShell の構文チェックは行いません。
+
+ローカルでは [editorconfig-checker v4.0.2](https://github.com/editorconfig-checker/editorconfig-checker/releases/tag/v4.0.2)
+をインストールし、リポジトリ直下で次を実行します。CI とローカルで同じバージョン・設定を使います。
+
+```bash
+editorconfig-checker
+```
+
+チェッカーはファイルを自動修正しません。指摘された行を修正するか、EditorConfig 対応エディタで整形してから再実行してください。
+
 [Windows E2E](https://github.com/Wataru-Toriumi/Background-Service-Sample/actions/workflows/windows-e2e.yml)
 は GitHub-hosted の `windows-2022` runner で実行します。
 ローカルと同じ `scripts/test-e2e.ps1` を使い、アプリの発行から FlaUI テストまで行います。
