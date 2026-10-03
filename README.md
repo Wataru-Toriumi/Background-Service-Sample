@@ -90,8 +90,8 @@ E2E は画面操作・実行基盤・シナリオをディレクトリで分け�
 ```text
 tests/BackgroundServiceSample.E2E/
   Screens/          # SettingsScreen / StatusScreen: 要素検索、入力・クリック、表示値の取得
-  Infrastructure/   # AppSession: 起動・終了、待機、診断情報の保存
-  Tests/            # SettingsTests / WorkerLifecycleTests: 操作手順と期待値の検証
+  Infrastructure/   # E2EScenario: テスト単位の分離 / AppSession: 起動・終了、待機、診断情報
+  Tests/            # SmokeTests / SettingsTests / WorkerLifecycleTests: 操作手順と期待値の検証
 ```
 
 テストは `app.OpenSettings()` / `app.OpenStatus()` で Screen Object を取得します。
@@ -105,6 +105,10 @@ Appium サーバーは不要です。テスト中はマウスを操作するた�
 ./scripts/test-e2e.ps1
 # Windows ARM64 の場合
 ./scripts/test-e2e.ps1 -Runtime win-arm64
+# 起動・タブ切り替え・正常終了のみを素早く確認
+./scripts/test-e2e.ps1 -Filter 'Category=Smoke'
+# 設定関連のシナリオだけ実行
+./scripts/test-e2e.ps1 -Filter 'FullyQualifiedName~SettingsTests'
 ```
 
 スクリプトは Release ビルドの発行とテストを行います。mise を利用する場合は
@@ -112,22 +116,54 @@ Appium サーバーは不要です。テスト中はマウスを操作するた�
 
 検証する内容:
 
+- スモークテストで起動・両タブの表示・正常終了を確認する
 - メインウィンドウが表示され、初期状態と開始・停止ボタンの有効状態が正しい
 - 開始ボタンからサービスが動き、状態・進捗・開始ログが UI に反映される
 - 停止後、実行中の処理は完了し、完了ログと進捗 100% が表示される
 - その後 6 秒間（定期間隔の 2 回分）、新しいタスクのログが増えない
 - ウィンドウを閉じると Host を含むアプリのプロセスが正常終了する
 - 設定画面の入力チェック・保存・編集の取り消しと、再起動後の設定読み込み
+- 壊れた設定の読み込み警告・既定値へのフォールバックと、保存し直した後の再起動
 
-E2E は毎回専用の一時ディレクトリを `BACKGROUND_SERVICE_SAMPLE_SETTINGS_DIR` で指定し、
-普段の設定を変更しません。設定保存後と再起動後の画面画像も結果に保存します。
+E2E はテストごとに専用の一時ディレクトリを `BACKGROUND_SERVICE_SAMPLE_SETTINGS_DIR` で指定し、
+普段の設定を変更しません。同じシナリオ内での再起動だけ設定を共有し、終了時に削除します。
+設定保存後と再起動後の画面画像も結果に保存します。
 
 要素は `AutomationProperties.AutomationId` で検索し、状態変化は最大 20 秒待機します。
-テストは並列実行しません。結果は `artifacts/e2e/results` に保存します。
+テストは並列実行しません。複数のテスト実行を同じデスクトップ上で同時に開始しないでください。
+結果は `artifacts/e2e/results/<実行日時-GUID>/` に保存し、過去の実行結果を上書きしません。
+その下の `<テスト名-GUID>/launch-<起動回数>/` に画像と失敗時の診断情報を保存するため、
+同名の画像や再起動前後の情報も混ざりません。TRX は実行ディレクトリ直下の `e2e.trx` です。
 失敗時にはプロセスログと例外、取得可能な場合はウィンドウ画像と UI 要素一覧も保存します。
 
 macOS / Linux では FlaUI の E2E は実行できません。
 CI に組み込む場合も、GUI 操作できる Windows セッションが必要です。
+
+### シナリオの追加方法
+
+`Tests/` に xUnit のテストを追加し、`E2EScenario` 経由でアプリを起動します。
+起動または検証で失敗した場合の診断保存と、プロセス終了は共通基盤が処理します。
+`RunApp` をもう一度呼ぶと、同じ設定を使って別プロセスで再起動できます。
+ウィンドウからの正常終了を検証する場合は `CloseWindowAndAssertExit` を明示的に呼びます。
+
+```csharp
+[Fact]
+public void Example_scenario()
+{
+    using var scenario = new E2EScenario(nameof(Example_scenario));
+    scenario.RunApp(app =>
+    {
+        var settings = app.OpenSettings();
+        Assert.Equal("3", settings.Interval);
+        app.CloseWindowAndAssertExit();
+    });
+}
+```
+
+新しい画面操作・AutomationId は `Screens/` に追加します。非同期の表示変更には
+固定秒数の待機ではなく `app.WaitUntil` を使い、期待する表示・値を条件にしてください。
+スモーク対象には `[Trait("Category", "Smoke")]` を付けます。
+ローカルの結果は蓄積されるため、不要になった実行ディレクトリは削除してください。
 
 ## GitHub Actions
 
@@ -191,6 +227,7 @@ editorconfig-checker
 
 - `main` への push と Pull Request で自動実行
 - Actions の **Windows E2E → Run workflow** から手動実行
+- 手動実行の `filter` に `Category=Smoke` などを指定して絞り込み（空欄・push・PR は全件実行）
 - 成功・失敗にかかわらず、生成されたテスト結果を `windows-e2e-results-*` artifact として 14 日間保存
 
 失敗時は実行画面の **Artifacts** から TRX、例外・プロセスログ、取得できた画面画像・UI 要素一覧を

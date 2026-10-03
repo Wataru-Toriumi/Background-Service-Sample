@@ -14,12 +14,12 @@ internal sealed class AppSession : IDisposable
     private UIA3Automation? _automation;
     private Window? _window;
     private readonly string _settingsDirectory;
-    private readonly bool _ownsSettingsDirectory;
+    private readonly string _artifactsDirectory;
 
-    public AppSession(string? settingsDirectory = null)
+    public AppSession(string settingsDirectory, string artifactsDirectory)
     {
-        _ownsSettingsDirectory = settingsDirectory is null;
-        _settingsDirectory = settingsDirectory ?? Path.Combine(Path.GetTempPath(), "BackgroundServiceSample.E2E", Guid.NewGuid().ToString("N"));
+        _settingsDirectory = settingsDirectory;
+        _artifactsDirectory = artifactsDirectory;
     }
 
     public void Start()
@@ -117,17 +117,13 @@ internal sealed class AppSession : IDisposable
 
     public void CaptureScreenshot(string name)
     {
-        var directory = Environment.GetEnvironmentVariable("E2E_ARTIFACTS_DIR")
-            ?? Path.Combine(AppContext.BaseDirectory, "TestResults");
-        Directory.CreateDirectory(directory);
-        _window!.CaptureToFile(Path.Combine(directory, name + ".png"));
+        Directory.CreateDirectory(_artifactsDirectory);
+        _window!.CaptureToFile(Path.Combine(_artifactsDirectory, name + ".png"));
     }
 
     public void SaveFailure(Exception error)
     {
-        var root = Environment.GetEnvironmentVariable("E2E_ARTIFACTS_DIR")
-            ?? Path.Combine(AppContext.BaseDirectory, "TestResults");
-        var directory = Path.Combine(root, $"failure-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}");
+        var directory = Path.Combine(_artifactsDirectory, "failure");
         try
         {
             Directory.CreateDirectory(directory);
@@ -182,10 +178,6 @@ internal sealed class AppSession : IDisposable
         {
             _process?.Dispose();
             _automation?.Dispose();
-            if (_ownsSettingsDirectory && Directory.Exists(_settingsDirectory))
-            {
-                Directory.Delete(_settingsDirectory, recursive: true);
-            }
         }
     }
 }
