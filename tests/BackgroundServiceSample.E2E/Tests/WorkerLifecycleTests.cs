@@ -9,10 +9,9 @@ public sealed class WorkerLifecycleTests
     [Fact]
     public void Start_progress_stop_and_close_work_through_the_real_window()
     {
-        using var app = new AppSession();
-        try
+        using var scenario = new E2EScenario(nameof(Start_progress_stop_and_close_work_through_the_real_window));
+        scenario.RunApp(app =>
         {
-            app.Start();
             var screen = app.OpenStatus();
             app.WaitUntil(() => screen.Status == "状態: 停止中" && screen.StartEnabled && !screen.StopEnabled,
                 "Initial stopped state");
@@ -47,11 +46,6 @@ public sealed class WorkerLifecycleTests
             }
 
             app.CloseWindowAndAssertExit();
-        }
-        catch (Exception error)
-        {
-            app.SaveFailure(error);
-            throw;
-        }
+        });
     }
 }
